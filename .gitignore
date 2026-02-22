@@ -1,0 +1,94 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Antigravity — .gitignore
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Secrets — NEVER commit ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+secrets.json
+credentials.json
+
+# ── Survey / client data — NEVER commit ──────────────────────────────────────
+test_input/
+tmp/
+data/
+raw_data/
+arch/
+
+# ── Binary data files ─────────────────────────────────────────────────────────
+*.zip
+*.xlsx
+*.xls
+*.csv
+*.sav
+*.dta
+
+# ── Txt/data files (keep named docs explicitly) ───────────────────────────────
+*.txt
+!requirements.txt
+
+# ── Internal docs (prompts, notes, setup guides) ─────────────────────────────
+codex_patch*.md
+codex_task*.md
+codex_audit*.md
+kimi_kickoff_prompt.md
+gemini.md
+prompt_antigravity_v2.md
+task_plan.md
+findings.md
+progress.md
+AUDIT_STATUS.md
+GITHUB_SETUP.md
+todo.md
+
+# ── Python environment ────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── ML artifacts ──────────────────────────────────────────────────────────────
+catboost_info/
+mlruns/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+
+# ── Notebooks output (generated at runtime) ───────────────────────────────────
+*.ipynb
+.ipynb_checkpoints/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+*.tmp
+*.bak
+streamlit_smoke.log
+
+# ── Skills folder (internal tooling) ─────────────────────────────────────────
+skills/
+
+# ── uv lock (optional, keep it for reproducibility) ─────────────────────────
+# uv.lock  ← intentionally NOT excluded

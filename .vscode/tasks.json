@@ -1,0 +1,42 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "🚀 Launch Antigravity App",
+            "type": "shell",
+            "command": ".venv\\Scripts\\streamlit.exe run app.py --server.headless false",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "clear": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "🔧 Run Pipeline (terminal mode)",
+            "type": "shell",
+            "command": ".venv\\Scripts\\python.exe tools\\0_launcher.py",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "📦 Install dependencies",
+            "type": "shell",
+            "command": ".venv\\Scripts\\pip.exe install -r requirements.txt",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

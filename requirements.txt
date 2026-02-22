@@ -1,0 +1,56 @@
+﻿# Project Antigravity â€” Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# ============================================
+# Core Data & ML
+# ============================================
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+scikit-learn>=1.3.0
+
+# ============================================
+# Boosting Libraries (Modeling)
+# ============================================
+xgboost>=2.0.0
+catboost>=1.2.0
+
+# ============================================
+# Explainability & Visualization
+# ============================================
+shap>=0.42.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# ============================================
+# Dimensionality Reduction (Typology)
+# ============================================
+umap-learn>=0.5.0
+
+# ============================================
+# Web Application
+# ============================================
+streamlit>=1.28.0
+
+# ============================================
+# Export Formats
+# ============================================
+nbformat>=5.9.0
+python-pptx>=0.6.21
+
+# ============================================
+# API & Connectivity
+# ============================================
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# ============================================
+# Optional: Conjoint Analysis
+# ============================================
+# pymer4>=0.8.0  # Uncomment if needed
+# statsmodels>=0.14.0  # Usually installed as dependency
+
+
+openpyxl>=3.1.0
+
