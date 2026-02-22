@@ -1,37 +1,36 @@
-﻿# Project Antigravity: Forsta Survey Analytics Engine
+# Untitled
 
-## ðŸŽ¯ Overview
+# Project Antigravity: Forsta Survey Analytics Engine
 
-Project Antigravity is a modular, analyst-first automation engine that transforms raw Forsta survey exports (~300 columns, patient & physician studies) into clean statistical deliverables. It handles the heavy lifting â€” ingestion, cleaning, modeling, commentary â€” so your data scientists and Power BI developers can focus entirely on design and client presentation.
+## 🎯 Overview
+
+Project Antigravity is a modular, analyst-first automation engine that transforms raw Forsta survey exports (~300 columns, patient & physician studies) into clean statistical deliverables. It handles the heavy lifting — ingestion, cleaning, modeling, commentary — so your data scientists and Power BI developers can focus entirely on design and client presentation.
 
 An analyst opens Antigravity, points it at a SharePoint survey folder, selects a workflow (full pipeline or specific module), and receives a ready-to-use deliverable in their format of choice.
 
----
 ## Environment Setup (required - Python 3.12 for SHAP compatibility)
 
-```bash
+```
 uv venv --python 3.12
 uv sync
 ```
 
 > Do NOT use Python 3.13+ - SHAP has a known incompatibility.
+> 
 
----
+## 🛡️ Core Principles
 
-## ðŸ›¡ï¸ Core Principles
-
-1. **RGPD Compliance & Privacy by Design:** All math runs on anonymized survey **codes**. Human-readable **labels** are applied only at final delivery. No PII or raw survey data ever reaches an LLM API â€” only aggregated statistical outputs.
+1. **RGPD Compliance & Privacy by Design:** All math runs on anonymized survey **codes**. Human-readable **labels** are applied only at final delivery. No PII or raw survey data ever reaches an LLM API — only aggregated statistical outputs.
 2. **Deterministic Processing:** LLMs are forbidden from performing data manipulation, math, or aggregations. Python (Pandas/Scikit-Learn) handles all transformations. LLMs are used exclusively for code generation, error assistance, and text commentary.
 3. **Analyst-First UX:** The system exposes a menu-driven interface. Analysts select a survey folder, pick a workflow or individual module, and let the engine run. No scripting required.
-4. **B.L.A.S.T. Protocol:** Architecture follows Blueprint â†’ Link â†’ Architect â†’ Stylize â†’ Trigger, ensuring modular, testable, self-healing code.
+4. **B.L.A.S.T. Protocol:** Architecture follows Blueprint → Link → Architect → Stylize → Trigger, ensuring modular, testable, self-healing code.
 5. **Versioning & Traceability:** Every completed analysis is committed to a dedicated GitHub repository branch, creating a full audit trail per project wave.
 
----
+## 🏗️ Architecture & Tech Stack
 
-## ðŸ—ï¸ Architecture & Tech Stack
+|
 
-| Layer | Technology |
-|---|---|
+| **Layer** | **Technology** |
 | Environment & Deps | Python 3.12, `uv` |
 | Exploration | `Marimo` notebooks (`.ipynb` compatible) |
 | Storage / Source of Truth | Microsoft SharePoint (Projects & Analytics folders) |
@@ -45,99 +44,88 @@ uv sync
 | Deployment | Docker containers |
 | Versioning | GitHub (per-project branches, automated commit on completion) |
 
----
-
-## ðŸ”„ Workflow
+## 🔄 Workflow
 
 ### Full Pipeline Mode
-1. **Ingest** â€” Pull raw Forsta files + data mapping dictionaries from SharePoint.
-2. **Clean** â€” Drop sparse columns (>90% empty), normalize types, handle missing values per mapping rules.
-3. **Analyze** â€” Run the selected statistical module(s) on survey codes.
-4. **Translate** â€” Map codes â†’ labels to produce a human-readable JSON statistical payload.
-5. **Commentary** â€” Route the JSON to the selected LLM to generate **two distinct insights**: Academic (methodological) and Business (strategic).
-6. **Deliver** â€” Export in the selected format (JSON / App / Notebook / PowerPoint), save back to SharePoint, commit to GitHub.
+
+1. **Ingest** — Pull raw Forsta files + data mapping dictionaries from SharePoint.
+2. **Clean** — Drop sparse columns (>90% empty), normalize types, handle missing values per mapping rules.
+3. **Analyze** — Run the selected statistical module(s) on survey codes.
+4. **Translate** — Map codes → labels to produce a human-readable JSON statistical payload.
+5. **Commentary** — Route the JSON to the selected LLM to generate **two distinct insights**: Academic (methodological) and Business (strategic).
+6. **Deliver** — Export in the selected format (JSON / App / Notebook / PowerPoint), save back to SharePoint, commit to GitHub.
 
 ### Module-Only Mode
+
 An analyst can trigger any single module in isolation:
+
 - Descriptive statistics only
 - Typology (K-Means) only
 - Model comparison only
 - Commentary only (on a pre-existing payload)
 
----
-
-## ðŸ“¦ Statistical Modules
+## 📦 Statistical Modules
 
 Each module is a standalone, atomic Python tool. Modules are selected at launch or auto-suggested by a template engine based on survey type.
 
-| Module | Methods |
-|---|---|
+| **Module** | **Methods** |
 | `descriptive` | Frequencies, cross-tabs, means, medians, confidence intervals (bootstrap) |
 | `typology` | K-Means with automated K selection (Elbow + Silhouette), UMAP visualization |
-| `modeling` | Automated comparison: Random Forest, XGBoost, CatBoost â€” SHAP explainability for winner |
-| `cbc` | Conjoint-Based Choice modeling: compare across `pymer4`, `statsmodels`, `conjoint` â€” select best fit |
+| `modeling` | Automated comparison: Random Forest, XGBoost, CatBoost — SHAP explainability for winner |
+| `cbc` | Conjoint-Based Choice modeling: compare across `pymer4`, `statsmodels`, `conjoint` — select best fit |
 | `forecasting` | Time-series or wave-over-wave trend analysis |
 | `regression` | Logistic regression with bootstrap CIs |
 
----
-
-## ðŸ¤– LLM Router
+## 🤖 LLM Router
 
 The AI layer is model-agnostic. At launch (or per-task), the analyst selects which LLM to use:
 
-| Provider | Best used for |
-|---|---|
+| **Provider** | **Best used for** |
 | **Claude** | Long-context analysis, structured JSON commentary, RGPD-sensitive synthesis |
 | **ChatGPT** | General business summaries, PowerPoint narrative |
 | **Kimi Code** | Code generation assistance, mapping resolution |
 | **Perplexity** | External benchmarking, literature-grounded academic commentary |
 
 Commentary is always generated in two personas:
-- **Academic/Statistical** â€” methodology, validity, statistical significance
-- **Business/Marketing** â€” strategic implications, client-facing language
+
+- **Academic/Statistical** — methodology, validity, statistical significance
+- **Business/Marketing** — strategic implications, client-facing language
 
 Power BI integration: the LLM router can also be called from Power Query (M) to generate synthesis commentary directly inside a PBI table (e.g., country-level summaries).
 
----
-
-## ðŸ“ Versioning & Collaboration
+## 📌 Versioning & Collaboration
 
 - Each survey project maps to a GitHub repository with branches per wave (e.g., `wave-1`, `wave-2`).
 - When a new capability is added, the system commits only /skills changes with a structured SKILL commit message.
 - Analysts can review, annotate, and merge via standard GitHub PR workflow.
-- Pinecone stores embeddings of past survey mappings and findings â€” enabling semantic search across historical projects.
+- Pinecone stores embeddings of past survey mappings and findings — enabling semantic search across historical projects.
 
----
-
-## ðŸŽ¨ Design Integration (Canva API)
+## 🎨 Design Integration (Canva API)
 
 Once the statistical payload and AI commentary are finalized, the system can push structured content to Canva via API to auto-populate slide templates, freeing analysts from manual deck building.
 
----
-
-## ðŸ—‚ï¸ Project File Structure
+## 🗂️ Project File Structure
 
 ```
 /antigravity/
-â”œâ”€â”€ README.md
-â”œâ”€â”€ task_plan.md
-â”œâ”€â”€ findings.md
-â”œâ”€â”€ progress.md
-â”œâ”€â”€ gemini.md               # Project rules + JSON Schema
-â”œâ”€â”€ .env                    # API keys (SharePoint, LLMs, GitHub, Pinecone, Canva)
-â”œâ”€â”€ app.py                  # Web App entry point (Streamlit/FastAPI)
-â”œâ”€â”€ Dockerfile
-â”œâ”€â”€ /arch/                  # SOPs and workflow templates
-â”œâ”€â”€ /tools/                 # Atomic Python scripts (pipeline modules)
-â”‚   â”œâ”€â”€ 1_ingest_clean.py
-â”‚   â”œâ”€â”€ 2_statistical_engine.py
-â”‚   â”œâ”€â”€ 3_ai_commentator.py
-â”‚   â”œâ”€â”€ 4_export_deliver.py
-â”‚   â””â”€â”€ 5_skill_commit.py
-â”œâ”€â”€ /skills/                # Per-step skill definitions (for agent routing)
-â”‚   â”œâ”€â”€ skill_clean.md
-â”‚   â”œâ”€â”€ skill_model.md
-â”‚   â””â”€â”€ skill_comment.md
-â””â”€â”€ /tmp/                   # Local test outputs
+├── README.md
+├── task_plan.md
+├── findings.md
+├── progress.md
+├── gemini.md               # Project rules + JSON Schema
+├── .env                    # API keys (SharePoint, LLMs, GitHub, Pinecone, Canva)
+├── app.py                  # Web App entry point (Streamlit/FastAPI)
+├── Dockerfile
+├── /arch/                  # SOPs and workflow templates
+├── /tools/                 # Atomic Python scripts (pipeline modules)
+│   ├── 1_ingest_clean.py
+│   ├── 2_statistical_engine.py
+│   ├── 3_ai_commentator.py
+│   ├── 4_export_deliver.py
+│   └── 5_skill_commit.py
+├── /skills/                # Per-step skill definitions (for agent routing)
+│   ├── skill_clean.md
+│   ├── skill_model.md
+│   └── skill_comment.md
+└── /tmp/                   # Local test outputs
 ```
-
