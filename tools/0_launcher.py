@@ -57,6 +57,16 @@ def parse_args():
         default="tmp/raw_data",
         help="Data source: folder path OR file path (.zip/.xlsx/.csv/.txt)",
     )
+    parser.add_argument(
+        "--goal",
+        default="segmentation",
+        choices=["segmentation", "drivers", "descriptive", "conjoint", "full"],
+        help="Analysis goal (default: segmentation)",
+    )
+    parser.add_argument("--k", type=int, default=4, help="Segment count for clustering modules (default: 4)")
+    parser.add_argument("--target", default=None, help="Optional target variable for supervised modules")
+    parser.add_argument("--with-notebook", action="store_true", help="Force notebook generation")
+    parser.add_argument("--with-powerbi", action="store_true", help="Enable Power BI package generation")
     return parser.parse_args()
 
 
@@ -353,6 +363,9 @@ def create_config(
     modules: List[str],
     delivery_format: str,
     llm_provider: str,
+    goal: str = "segmentation",
+    k_segments: int = 4,
+    target_variable: str | None = None,
     modules_source: str = "manual",
     prefer_schema_suggestion: bool = False,
     generate_notebook: bool = False,
@@ -367,13 +380,14 @@ def create_config(
             "survey_type": "forsta",
             "wave": project_info["wave"],
             "selected_modules": modules,
-            "goal": "segmentation",
-            "k_segments": 4,
+            "goal": goal,
+            "k_segments": int(k_segments),
             "workflow_type": workflow_type,
             "delivery_format": delivery_format,
             "llm_provider": llm_provider,
             "source_path": sharepoint_path,
             "modules_source": modules_source,
+            "target_variable": target_variable,
         },
         "generate_notebook": generate_notebook,
         "generate_powerbi": generate_powerbi,
@@ -632,7 +646,8 @@ def main():
     modules = None
     modules_source = "manual"
     prefer_schema_suggestion = False
-    generate_notebook = bool(non_interactive)
+    generate_notebook = bool(non_interactive) or bool(args.with_notebook)
+    generate_powerbi = bool(args.with_powerbi)
 
     if non_interactive:
         print("=" * 70)
@@ -663,10 +678,13 @@ def main():
         modules=selected_modules,
         delivery_format=delivery_format,
         llm_provider=llm_provider,
+        goal=args.goal,
+        k_segments=max(2, int(args.k)),
+        target_variable=args.target,
         modules_source=modules_source,
         prefer_schema_suggestion=prefer_schema_suggestion,
         generate_notebook=generate_notebook,
-        generate_powerbi=(delivery_format == "powerbi"),
+        generate_powerbi=generate_powerbi or (delivery_format == "powerbi"),
     )
 
     display_summary(config)
