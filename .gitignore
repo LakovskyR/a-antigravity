@@ -28,19 +28,8 @@ arch/
 *.txt
 !requirements.txt
 
-# ── Internal docs (prompts, notes, setup guides) ─────────────────────────────
-codex_patch*.md
-codex_task*.md
-codex_audit*.md
-kimi_kickoff_prompt.md
-gemini.md
-prompt_antigravity_v2.md
-task_plan.md
-findings.md
-progress.md
-AUDIT_STATUS.md
-GITHUB_SETUP.md
-todo.md
+# ── DEV folder (internal: prompts, notes, setup guides) ─────────────────────
+DEV/
 
 # ── Python environment ────────────────────────────────────────────────────────
 .venv/
