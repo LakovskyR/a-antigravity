@@ -46,6 +46,13 @@ requests>=2.31.0
 python-dotenv>=1.0.0
 
 # ============================================
+# FastAPI Bridge (api_server.py)
+# ============================================
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+
+# ============================================
 # Optional: Conjoint Analysis
 # ============================================
 # pymer4>=0.8.0  # Uncomment if needed

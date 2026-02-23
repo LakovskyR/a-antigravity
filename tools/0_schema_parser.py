@@ -333,6 +333,16 @@ def parse_schema(schema_content: str) -> dict:
         q_label = parts[6].strip() if len(parts) > 6 else ""
         a_label = parts[7].strip() if len(parts) > 7 else ""
 
+        # Skip loop identifier rows (e.g. lpPatients itself is not a question)
+        if var_id and q_id and var_id == q_id and var_id.lower().startswith("lp"):
+            continue
+        # Skip loop identifier rows (e.g. lpPatients itself is not a question)
+        if var_id.lower().startswith("lp") and q_type not in TYPE_TO_ANALYTICS:
+            continue
+        # Skip malformed/unsupported rows where the variable mirrors the question ID
+        if var_id == q_id and (not q_type or q_type not in TYPE_TO_ANALYTICS):
+            continue
+
         # Skip pure metadata
         if any(q_id.startswith(p) for p in METADATA_PREFIXES):
             continue
@@ -341,8 +351,20 @@ def parse_schema(schema_content: str) -> dict:
 
         if q_id not in questions:
             # Clean label (remove Forsta ^logic^ tags)
-            clean_label = re.sub(r"\^[^)]+\)", "", q_label)  # remove ^IT()? ...^
-            clean_label = re.sub(r"\^[^^]+\^", "", clean_label).strip(" ,")
+            clean_label = q_label
+            # Remove ^?'...'...^ conditional display logic (Forsta)
+            clean_label = re.sub(r"\^\?'[^']*'[^)]*\)\^", "", clean_label)
+            clean_label = re.sub(r"\^\?'[^']*'[^']*'[^']*'\^", "", clean_label)
+            # Remove standard ^...^ logic tags
+            clean_label = re.sub(r"\^[^^]*\^", "", clean_label)
+            # Remove ^IT()? style tags
+            clean_label = re.sub(r"\^[^)]+\)\^?", "", clean_label)
+            # Remove leading ^ characters
+            clean_label = re.sub(r"^\^+", "", clean_label)
+            # Remove leading loop placeholder fragments (e.g. "AML patient #")
+            clean_label = re.sub(r"^\s*[A-Za-z][A-Za-z\s]*patient\s*#\s*", "", clean_label, flags=re.IGNORECASE)
+            # Strip whitespace, commas, question marks
+            clean_label = clean_label.strip(" ,?")
 
             questions[q_id] = {
                 "type": q_type,
@@ -380,8 +402,8 @@ def extract_variable_ids(questions: dict) -> dict:
             continue
         keep_vars.extend(info["variables"])
 
-    # Always keep key metadata
-    always_keep = ["responseid", "QCountry", "hWave", "SampleHouse",
+    # Always keep key metadata (exclude respondent identifiers from analytics payload)
+    always_keep = ["QCountry", "hWave", "SampleHouse",
                    "SPE", "InLoop1", "InLoop2"]
     keep_vars = list(dict.fromkeys(always_keep + keep_vars))  # dedup, preserve order
 

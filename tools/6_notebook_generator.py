@@ -6,6 +6,7 @@ Generates an executable .ipynb for data scientist exploration.
 import argparse
 import io
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -173,7 +174,7 @@ def cell_title(ctx: dict, setup: dict) -> list:
     ]
 
 
-def cell_parameters(setup: dict) -> list:
+def cell_parameters(setup: dict, data_path: str, schema_path: str, pca_path: str) -> list:
     target = f'"{setup["target_variable"]}"' if setup["target_variable"] != "auto" else "None  # auto-detected"
     modules_str = json.dumps(setup["modules"], indent=4)
     return [
@@ -212,9 +213,9 @@ SATISFACTION_PREFIX = "Satisfaction_"
 MODULES = {modules_str}
 
 # Data paths
-DATA_PATH   = "../tmp/cleaned_codes.csv"
-SCHEMA_PATH = "../tmp/project_schema.json"
-PCA_PATH    = "../tmp/pca_coordinates.csv"
+DATA_PATH   = "{data_path}"
+SCHEMA_PATH = "{schema_path}"
+PCA_PATH    = "{pca_path}"
 """
         ),
     ]
@@ -251,6 +252,10 @@ plt.rcParams["figure.dpi"] = 120
 sns.set_theme(style="whitegrid")
 
 df = pd.read_csv(DATA_PATH)
+id_cols = [c for c in df.columns if c.lower() in {"responseid", "respondent_id"}]
+if id_cols:
+    df = df.drop(columns=id_cols)
+    print(f"Dropped technical ID columns: {id_cols}")
 with open(SCHEMA_PATH, encoding="utf-8") as f:
     schema = json.load(f)
 
@@ -931,7 +936,7 @@ plt.show()
     ]
 
 
-def cell_rf_shap() -> list:
+def cell_rf_shap(propensity_path: str) -> list:
     return [
         md("## 6b. Random Forest + SHAP Feature Importances"),
         code(
@@ -985,7 +990,7 @@ else:
 
 # Propensity scores
 df["propensity_score"] = rf.predict_proba(X_rf)[:, 1]
-propensity_path = "../tmp/output_propensity_scores.csv"
+propensity_path = "{propensity_path}"
 df[["propensity_score"]].to_csv(propensity_path, index=False)
 print(f"Propensity scores saved: {propensity_path}")
 
@@ -1111,7 +1116,14 @@ for k, v in summary.items():
     ]
 
 
-def build_notebook(ctx: dict, setup: dict) -> nbformat.NotebookNode:
+def build_notebook(
+    ctx: dict,
+    setup: dict,
+    data_path: str,
+    schema_path: str,
+    pca_path: str,
+    propensity_path: str,
+) -> nbformat.NotebookNode:
     modules = setup["modules"]
     schema = ctx.get("schema", {})
     k = setup["k_segments"]
@@ -1119,7 +1131,7 @@ def build_notebook(ctx: dict, setup: dict) -> nbformat.NotebookNode:
 
     cells = []
     cells += cell_title(ctx, setup)
-    cells += cell_parameters(setup)
+    cells += cell_parameters(setup, data_path, schema_path, pca_path)
     cells += cell_setup()
     cells += cell_overview()
     cells += cell_descriptive(schema)
@@ -1145,7 +1157,7 @@ def build_notebook(ctx: dict, setup: dict) -> nbformat.NotebookNode:
     if driver_modules:
         cells += cell_drivers(target)
     if "modeling" in modules:
-        cells += cell_rf_shap()
+        cells += cell_rf_shap(propensity_path)
 
     if "anova" in modules:
         cells += cell_anova(schema)
@@ -1188,7 +1200,12 @@ def main():
         target=args.target,
         k=args.k,
     )
-    nb = build_notebook(ctx, setup)
+    tmp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tmp"))
+    data_path = os.path.join(tmp_dir, "cleaned_codes.csv").replace("\\", "/")
+    schema_path = os.path.join(tmp_dir, "project_schema.json").replace("\\", "/")
+    pca_path = os.path.join(tmp_dir, "pca_coordinates.csv").replace("\\", "/")
+    propensity_path = os.path.join(tmp_dir, "output_propensity_scores.csv").replace("\\", "/")
+    nb = build_notebook(ctx, setup, data_path, schema_path, pca_path, propensity_path)
 
     project = ctx.get("config", {}).get("project_metadata", {}).get("project_name", "survey")
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")

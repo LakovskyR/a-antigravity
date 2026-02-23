@@ -25,6 +25,7 @@ DROP_PREFIXES: List[str] = []
 DROP_SUFFIXES: List[str] = ["_label", "_text", "_open"]
 SPARSITY_THRESHOLD: float = 0.9
 PII_PATTERNS: List[str] = ["email", "name", "phone", "address", "ip", "respondent"]
+TECHNICAL_ID_COLUMNS: List[str] = ["responseid", "respondent_id"]
 # ============================================================
 
 # DATA_MODE - controls RGPD strictness
@@ -424,6 +425,7 @@ def apply_column_filter(df: pd.DataFrame, config: dict = None) -> Tuple[pd.DataF
     logs = {
         "kept": [],
         "dropped_not_in_schema": [],
+        "dropped_technical_ids": [],
         "dropped_pii": [],
         "dropped_sparse": [],
         "mode": DATA_MODE,
@@ -464,6 +466,12 @@ def apply_column_filter(df: pd.DataFrame, config: dict = None) -> Tuple[pd.DataF
 
         df_filtered = df[candidate_cols].copy()
         print(f"  Manual filter: kept {len(candidate_cols)} / {len(df.columns)} columns")
+
+    id_cols = [c for c in df_filtered.columns if c.lower() in TECHNICAL_ID_COLUMNS]
+    if id_cols:
+        df_filtered = df_filtered.drop(columns=id_cols)
+        logs["dropped_technical_ids"] = id_cols
+        print(f"  Dropped {len(id_cols)} technical ID columns")
 
     pii_cols = [c for c in df_filtered.columns if any(p in c.lower() for p in PII_PATTERNS)]
     if pii_cols:
@@ -585,6 +593,16 @@ def main():
         print(f"Local source load failed ({exc}). Trying SharePoint/local fallback...")
         df_raw, mapping_dict = download_from_sharepoint(config)
         detected_format = "sharepoint_or_fallback"
+
+    # Drop fully empty rows
+    rows_before = len(df_raw)
+    df_raw = df_raw.dropna(how="all").reset_index(drop=True)
+    # Drop rows where more than 80% of columns are null
+    threshold = max(1, int(len(df_raw.columns) * 0.2))
+    df_raw = df_raw.dropna(thresh=threshold).reset_index(drop=True)
+    rows_after = len(df_raw)
+    if rows_before != rows_after:
+        print(f"  Dropped {rows_before - rows_after} empty/sparse rows ({rows_after} remaining)")
 
     config["run_info"]["detected_format"] = detected_format
 
